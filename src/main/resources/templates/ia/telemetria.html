@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('Copiloto IA & Telemetria IoT')}"></head>
+<body class="bg-light">
+
+<nav th:replace="~{fragments/header :: navbar}"></nav>
+
+<main class="container py-4">
+    <div th:if="${sucesso}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i><span th:text="${sucesso}">Sucesso</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <span class="badge bg-success mb-1"><i class="bi bi-cpu-fill me-1"></i>Disruptive Architectures: IoT, IoB & Generative AI + Java Advanced</span>
+            <h2 class="fw-bold mb-1 text-dark">Copiloto Clínico IA Híbrida & Telemetria IoT (ESP32)</h2>
+            <p class="text-muted mb-0">
+                Ingestão de telemetria fisiológica da coleira inteligente (Wokwi ESP32 + DHT22 + Acelerômetro IOB),
+                cálculo do Índice de Risco Preventivo (IRP) e geração automática de prontuário estruturado SOAP.
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="https://wokwi.com/projects/464135788106122241" target="_blank" class="btn btn-outline-dark btn-sm">
+                <i class="bi bi-box-arrow-up-right me-1"></i>Abrir Simulador Wokwi ESP32
+            </a>
+            <a th:href="@{/alertas}" class="btn btn-warning btn-sm fw-semibold">
+                <i class="bi bi-bell-fill me-1"></i>Ver Alertas Gerados
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Formulário de Ingestão / Simulação de Pacote MQTT IoT -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-petcare text-white p-3 rounded-top-4">
+                    <h5 class="fw-bold mb-0"><i class="bi bi-broadcast me-2 text-warning"></i>Transmitir Pacote IoT (MQTT/HTTP)</h5>
+                    <small class="text-white-50">Simule uma leitura da coleira inteligente ESP32</small>
+                </div>
+                <div class="card-body p-4">
+                    <form th:action="@{/ia-telemetria/registrar}" th:object="${telemetriaForm}" method="post">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Pet Monitorado</label>
+                            <select th:field="*{petId}" class="form-select" required>
+                                <option value="">Selecione o pet...</option>
+                                <option th:each="p : ${pets}"
+                                        th:value="${p.id}"
+                                        th:text="${p.nome} + ' (' + ${p.especie} + ' - ' + ${p.tutor.nome} + ')'">Rex</option>
+                            </select>
+                            <div class="text-danger small" th:if="${#fields.hasErrors('petId')}" th:errors="*{petId}"></div>
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label fw-semibold small">Temperatura (°C)</label>
+                                <input type="number" step="0.1" min="34.0" max="43.0" th:field="*{temperaturaCorporal}" class="form-control" required>
+                                <small class="text-muted" style="font-size: 0.7rem;">Alerta se &gt; 39.4 °C</small>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-semibold small">Umidade (%)</label>
+                                <input type="number" step="0.5" min="10" max="100" th:field="*{umidadeAmbiente}" class="form-control" required>
+                            </div>
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label fw-semibold small">Atividade IOB (%)</label>
+                                <input type="number" min="0" max="100" th:field="*{atividadeIob}" class="form-control" required>
+                                <small class="text-muted" style="font-size: 0.7rem;">Letargia se &lt; 35%</small>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-semibold small">Batimentos (BPM)</label>
+                                <input type="number" min="40" max="240" th:field="*{batimentosBpm}" class="form-control" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">Identificador do Sensor / Tópico MQTT</label>
+                            <input type="text" th:field="*{origemDispositivo}" class="form-control" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-petcare w-100 fw-bold py-2">
+                            <i class="bi bi-cpu me-1"></i>Processar no Motor de IA Híbrida
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feed de Telemetria, Predição IRP e Prontuários SOAP -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0"><i class="bi bi-journal-Richtext text-success me-2"></i>Laudos Preventivos SOAP & Score IRP</h5>
+                    <span class="badge bg-secondary" th:text="${#lists.size(telemetrias)} + ' leituras registradas'">3 leituras</span>
+                </div>
+                <div class="card-body px-4 pb-4">
+                    <div class="vstack gap-3">
+                        <div class="card border rounded-3 shadow-sm" th:each="t : ${telemetrias}">
+                            <div class="card-body">
+                                <div class="d-flex flex-wrap justify-content-between align-items-center mb-2 gap-2">
+                                    <div>
+                                        <a th:href="@{/pets/{id}(id=${t.pet.id})}" class="h5 fw-bold text-decoration-none mb-0 me-2" th:text="${t.pet.nome}">Thor</a>
+                                        <span class="text-muted small" th:text="'Tutor: ' + ${t.pet.tutor.nome}">Tutor</span>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge fs-6"
+                                              th:classappend="${t.nivelRisco == 'ALTO' ? 'bg-danger' : (t.nivelRisco == 'MODERADO' ? 'bg-warning text-dark' : 'bg-success')}"
+                                              th:text="'Score IRP: ' + ${t.scoreIrp} + '/100 — RISCO ' + ${t.nivelRisco}">IRP 78/100</span>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex flex-wrap gap-2 mb-3">
+                                    <span class="badge bg-light text-dark border"><i class="bi bi-thermometer-high text-danger me-1"></i>Temp: <strong th:text="${t.temperaturaCorporal} + ' °C'">39.7 °C</strong></span>
+                                    <span class="badge bg-light text-dark border"><i class="bi bi-droplet-half text-info me-1"></i>Umidade: <strong th:text="${t.umidadeAmbiente} + '%'">68.5%</strong></span>
+                                    <span class="badge bg-light text-dark border"><i class="bi bi-activity text-primary me-1"></i>Atividade IOB: <strong th:text="${t.atividadeIob} + '%'">28%</strong></span>
+                                    <span class="badge bg-light text-dark border"><i class="bi bi-heart-pulse text-danger me-1"></i>FC: <strong th:text="${t.batimentosBpm} + ' BPM'">128 BPM</strong></span>
+                                    <span class="badge bg-light text-secondary border"><i class="bi bi-router me-1"></i><span th:text="${t.origemDispositivo}">ESP32</span></span>
+                                    <span class="badge bg-light text-secondary border"><i class="bi bi-clock me-1"></i><span th:text="${#temporals.format(t.dataLeitura, 'dd/MM/yyyy HH:mm')}">Data</span></span>
+                                </div>
+
+                                <div class="p-3 rounded-3 bg-light border-start border-4 border-primary mb-2">
+                                    <div class="small fw-bold text-primary mb-1">
+                                        <i class="bi bi-clipboard2-pulse-fill me-1"></i>Assistente Clínico Veterinário (Nota Estruturada SOAP):
+                                    </div>
+                                    <p class="small mb-0 text-dark font-monospace" th:text="${t.resumoSoap}">[S] ... [O] ... [A] ... [P] ...</p>
+                                </div>
+
+                                <div class="p-2 px-3 rounded-3 bg-success bg-opacity-10 border border-success border-opacity-25">
+                                    <div class="small fw-bold text-success">
+                                        <i class="bi bi-chat-heart-fill me-1"></i>Copiloto do Tutor (Recomendação Empática):
+                                    </div>
+                                    <p class="small mb-0 text-dark" th:text="${t.orientacaoTutor}">Recomendação...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>
