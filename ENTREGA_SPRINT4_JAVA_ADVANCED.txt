@@ -1,0 +1,68 @@
+===============================================================================
+FIAP — CHALLENGE 2026 | 4ª SPRINT (ENTREGA FINAL) — JAVA ADVANCED
+PROJETO: PETCARE 360 — PLATAFORMA VETERINÁRIA PREVENTIVA (CLYVO VET)
+TURMA: 2TDSPW | PROFESSOR: LEONARDO REAL (lgsreal)
+===============================================================================
+
+1. INTEGRANTES DO GRUPO (2TDSPW)
+-------------------------------------------------------------------------------
+- João Vitor Lacerda Consorte  — RM 565565 (Arquitetura, Spring Security, OAuth2 GitHub/Google & i18n)
+- Kauan Vieira de Lima         — RM 565403 (Integração IoT ESP32 & Copiloto Clínico IA SOAP / Score IRP)
+- Murillo Fernandes Carapia    — RM 564969 (Flyway V3, Motor JSON NoSQL FN_PET_JSON, Auditoria & Cloud/Docker)
+- Pedro de Matos Previtali     — RM 564184 (Fluxos Transacionais Não-CRUD, UI/UX Thymeleaf, ADRs & Testes QA)
+
+2. LINKS OFICIAIS DA ENTREGA (REPOSITÓRIO, DEPLOY ONLINE E VÍDEO)
+-------------------------------------------------------------------------------
+- Repositório GitHub Público (Sprint 4 Java Advanced):
+  https://github.com/joaolacerdaconsorte/challenge-sprint-4-java
+  (Também atualizado em: https://github.com/joaolacerdaconsorte/challenge-sprint-3)
+
+- Aplicação Online (Deploy Cloud):
+  - URL Pública Principal (Java Advanced Sprint 4): https://ac61307b65009b.lhr.life/login
+  - Blueprint 1-Click Render Cloud (render.yaml):   https://render.com/deploy?repo=https://github.com/joaolacerdaconsorte/challenge-sprint-4-java
+  - Ecossistema Cloud Integrado (Azure Web App — DevOps & .NET):
+    https://petcare360-rm564969.azurewebsites.net/health
+  - Simulador Hardware Coleira Inteligente (Wokwi ESP32 + DHT22 + MQTT):
+    https://wokwi.com/projects/464135788106122241
+
+- Vídeo de Apresentação (Até 15 minutos — Todos os 4 Integrantes):
+  [INSERIR LINK DO YOUTUBE NÃO LISTADO AQUI]
+  (Roteiro completo minuto a minuto em: documentos/roteiro-video-15min.md)
+
+3. RESOLUÇÃO DO FEEDBACK DA SPRINT 3 (80 -> 100 PONTOS)
+-------------------------------------------------------------------------------
+Feedback Oficial da Sprint 3:
+"O que faltou para nota máxima? Adicionar OAuth2 com login de terceiros (Google e/ou GitHub) à página de login."
+
+Evoluções implementadas na Sprint 4:
+[x] OAuth2 Login com GitHub (/oauth2/authorization/github) e Google (/oauth2/authorization/google) configurado em SecurityConfig.java, application.yml e templates/login.html.
+[x] Provisionamento automático de usuários federados via CustomOAuth2UserService em TB_USUARIO (colunas OAUTH_PROVIDER e EMAIL adicionadas na migration V3).
+[x] Modo Avaliador OAuth2 Sandbox (/oauth2/sandbox/github e /oauth2/sandbox/google) na tela de login para permitir teste instantâneo do fluxo de callback OAuth2 mesmo em avaliação local sem chaves externas.
+[x] Internacionalização nativa (i18n PT-BR e EN) com SessionLocaleResolver e seletor de idiomas em toda a interface.
+[x] 4 Motores Transacionais Não-CRUD (@Transactional):
+    1. Triagem Preventiva & Agendamento Inteligente (/agendamentos/novo)
+    2. Atendimento Clínico Integrado com Vacinação, Prescrição e Auditoria (/atendimento/fila)
+    3. Copiloto Clínico IA Híbrida (Score IRP + Prontuário SOAP + Telemetria IoT ESP32) (/ia-telemetria)
+    4. Hub de Integração Multidisciplinar (Exportador JSON NoSQL FN_PET_JSON, Risco Vacinal FN_CALC_RISCO_VACINAL e Trilha TB_AUDITORIA_PET) (/integracao)
+[x] 6 Architecture Decision Records (ADRs) em documentos/adr/ justificando todas as decisões técnicas.
+[x] Containerização Multi-Stage Non-Root (Dockerfile + docker-compose.yml + render.yaml) e 11 testes automatizados JUnit 5 + MockMvc passando 100%.
+
+4. CREDENCIAIS DE DEMONSTRAÇÃO (RBAC + OAUTH2)
+-------------------------------------------------------------------------------
+- Perfil ADMIN:        admin / admin123        (Acesso total + Gestão de Clínicas e Exclusões)
+- Perfil VETERINARIO:  vet / vet123            (ou veterinario / vet123 — Fila Clínica + Copiloto IA)
+- Perfil USER (Tutor): user / user123          (ou tutor / user123 — Dashboard, Triagem, Pets e Telemetria)
+- Login Social OAuth2: Botões "Continuar com GitHub" e "Continuar com Google" na tela /login
+
+5. INSTRUÇÕES RÁPIDAS DE EXECUÇÃO LOCAL
+-------------------------------------------------------------------------------
+Pré-requisito: Java 21 LTS (ou Docker)
+Comando:
+  .\gradlew.bat bootRun
+Acesso:
+  http://localhost:8080/login
+  http://localhost:8080/swagger-ui.html
+  http://localhost:8080/health
+Testes Automatizados:
+  .\gradlew.bat test
+===============================================================================
