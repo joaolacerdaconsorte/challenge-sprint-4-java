@@ -1,0 +1,15 @@
+services:
+  petcare360-java:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: petcare360-clyvo-sprint4
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID:-petcare360-github-client-id}
+      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET:-petcare360-github-secret}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-petcare360-google-client-id}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-petcare360-google-secret}
+    restart: unless-stopped

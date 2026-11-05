@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('Hub de Integração Multidisciplinar')}"></head>
+<body class="bg-light">
+
+<nav th:replace="~{fragments/header :: navbar}"></nav>
+
+<main class="container py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <span class="badge bg-warning text-dark mb-1"><i class="bi bi-diagram-3-fill me-1"></i>Critério Oficial FIAP Sprint 4 — Integração Multidisciplinar (20 pts)</span>
+            <h2 class="fw-bold mb-1 text-dark">Hub de Integração Multidisciplinar — Ecossistema CLYVO VET</h2>
+            <p class="text-muted mb-0">
+                Convergência técnica em tempo real entre Java Advanced, Mastering Database (Oracle PL/SQL & MongoDB),
+                DevOps & Cloud Azure, Mobile React Native, Disruptive Architectures (IoT/IA) e QA/BDD.
+            </p>
+        </div>
+    </div>
+
+    <!-- Cards das Disciplinas Integradas -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body">
+                    <span class="badge bg-primary mb-2">Database (Nota 95/100)</span>
+                    <h6 class="fw-bold">Oracle PL/SQL & MongoDB NoSQL</h6>
+                    <p class="small text-muted mb-2">
+                        Espelhamento nativo do pacote <code>PKG_CLYVO_VET</code>: funções <code>FN_PET_JSON</code>,
+                        <code>FN_CALC_RISCO_VACINAL</code> e trigger de auditoria <code>TRG_AUDITORIA_PET</code> em <code>TB_AUDITORIA_PET</code>.
+                    </p>
+                    <span class="badge bg-light text-dark border">3FN + JSON Document</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body">
+                    <span class="badge bg-info text-dark mb-2">DevOps & .NET Cloud</span>
+                    <h6 class="fw-bold">Azure App Service + Cosmos DB</h6>
+                    <p class="small text-muted mb-2">
+                        Pipeline CI/CD Azure DevOps, Docker Multi-Stage Non-Root e microsserviço integrado em produção na nuvem Azure.
+                    </p>
+                    <a href="https://petcare360-rm564969.azurewebsites.net/health" target="_blank" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-cloud-check me-1"></i>Health Check Azure Live
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body">
+                    <span class="badge bg-success mb-2">Mobile (Nota 100/100) & QA BDD</span>
+                    <h6 class="fw-bold">React Native Expo + Azure Boards</h6>
+                    <p class="small text-muted mb-2">
+                        Consumo de API RESTful JWT + HATEOAS pelo app Mobile dos tutores e cobertura de 11 PBIs BDD Gherkin mapeados no Azure Boards.
+                    </p>
+                    <a th:href="@{/swagger-ui.html}" target="_blank" class="btn btn-sm btn-outline-success">
+                        <i class="bi bi-braces me-1"></i>Abrir OpenAPI / Swagger
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Exportador JSON NoSQL (Equivalente FN_PET_JSON & FN_CALC_RISCO_VACINAL) -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-white border-0 pt-4 px-4">
+                    <h5 class="fw-bold mb-1">
+                        <i class="bi bi-filetype-json text-primary me-2"></i>Motor Híbrido Relacional → NoSQL (<code>FN_PET_JSON</code>)
+                    </h5>
+                    <p class="small text-muted mb-0">
+                        Selecione um Pet para inspecionar o documento JSON gerado dinamicamente para o MongoDB / Azure Cosmos DB e o cálculo de risco vacinal (<code>FN_CALC_RISCO_VACINAL</code>).
+                    </p>
+                </div>
+                <div class="card-body px-4 pb-4">
+                    <form th:action="@{/integracao}" method="get" class="d-flex gap-2 mb-3">
+                        <select name="petId" class="form-select">
+                            <option th:each="p : ${pets}"
+                                    th:value="${p.id}"
+                                    th:selected="${p.id == petSelecionadoId}"
+                                    th:text="${p.nome} + ' (' + ${p.especie} + ' - Tutor: ' + ${p.tutor.nome} + ')'">Rex</option>
+                        </select>
+                        <button type="submit" class="btn btn-petcare fw-semibold">Gerar JSON</button>
+                    </form>
+
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="small fw-bold text-secondary">Status <code>FN_CALC_RISCO_VACINAL</code>:</span>
+                        <span class="badge"
+                              th:classappend="${riscoVacinal == 'ALTO_RISCO_VACINA_VENCIDA' ? 'bg-danger' : (riscoVacinal == 'MODERADO_REFORCO_PROXIMO' ? 'bg-warning text-dark' : 'bg-success')}"
+                              th:text="${riscoVacinal}">STATUS</span>
+                    </div>
+
+                    <pre class="bg-dark text-warning p-3 rounded-3 small mb-2" style="max-height: 360px; overflow-y: auto;"><code th:text="${petJson}">{}</code></pre>
+
+                    <a th:if="${petSelecionadoId != null}"
+                       th:href="@{/api/integracao/pets/{id}/json(id=${petSelecionadoId})}"
+                       target="_blank"
+                       class="btn btn-sm btn-outline-dark">
+                        <i class="bi bi-box-arrow-up-right me-1"></i>Abrir Endpoint REST JSON Puro (<code>/api/integracao/pets/{id}/json</code>)
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trilha de Auditoria Automática (Equivalente TRG_AUDITORIA_PET) -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-white border-0 pt-4 px-4">
+                    <h5 class="fw-bold mb-1">
+                        <i class="bi bi-shield-lock-fill text-danger me-2"></i>Trilha de Auditoria Clínica (<code>TB_AUDITORIA_PET</code>)
+                    </h5>
+                    <p class="small text-muted mb-0">
+                        Espelhamento da trigger <code>TRG_AUDITORIA_PET</code>: toda criação de Pet, alteração cadastral ou atualização de peso durante Atendimento Clínico grava automaticamente o estado anterior, novo estado e usuário responsável.
+                    </p>
+                </div>
+                <div class="card-body px-4 pb-4">
+                    <div class="table-responsive" style="max-height: 430px; overflow-y: auto;">
+                        <table class="table table-sm table-hover align-middle mb-0">
+                            <thead class="table-light">
+                            <tr>
+                                <th>Data/Hora</th>
+                                <th>Pet</th>
+                                <th>Op.</th>
+                                <th>Valores Auditados</th>
+                                <th>Usuário</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="aud : ${auditorias}">
+                                <td class="small text-nowrap" th:text="${#temporals.format(aud.dataEvento, 'dd/MM/yy HH:mm')}">10/04/26</td>
+                                <td class="fw-bold small" th:text="${aud.nomePet}">Rex</td>
+                                <td>
+                                    <span class="badge"
+                                          th:classappend="${aud.operacao == 'INSERT' ? 'bg-success' : (aud.operacao == 'UPDATE' ? 'bg-warning text-dark' : 'bg-danger')}"
+                                          th:text="${aud.operacao}">UPDATE</span>
+                                </td>
+                                <td class="small">
+                                    <div th:if="${aud.valoresAntigos != null}" class="text-muted">
+                                        <strong>Antes:</strong> <span th:text="${aud.valoresAntigos}"></span>
+                                    </div>
+                                    <div th:if="${aud.valoresNovos != null}" class="text-dark">
+                                        <strong>Depois:</strong> <span th:text="${aud.valoresNovos}"></span>
+                                    </div>
+                                </td>
+                                <td><span class="badge bg-secondary" th:text="${aud.usuarioResponsavel}">veterinario</span></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>
